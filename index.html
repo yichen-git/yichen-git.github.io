@@ -1,227 +1,70 @@
-<html lang="en">
-	<head>
-		<title>Image on a sphere</title>
-		<style>
-			body { margin: 0; }
-			canvas { width: 100%; height: 100% }
-		</style>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	</head>
-	<body>
+<!DOCTYPE html>
+<!--
+ *  Copyright (c) 2015 The WebRTC project authors. All Rights Reserved.
+ *
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree.
+-->
+<html>
+<head>
 
-		<script src="js/three.js"></script>
-		<script id="vertexShader" type="x-shader/x-vertex">
-			varying vec3 worldPosition;
+    <meta charset="utf-8">
+    <meta name="description" content="WebRTC code samples">
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
+    <meta itemprop="description" content="Client-side WebRTC code samples">
+    <meta itemprop="image" content="../../../images/webrtc-icon-192x192.png">
+    <meta itemprop="name" content="WebRTC code samples">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta id="theme-color" name="theme-color" content="#ffffff">
 
-			vec3 transformDirection(in vec3 dir, in mat4 matrix) {
-				return normalize((matrix * vec4( dir, 0.0)).xyz);
-			}
+    <base target="_blank">
 
-      void main () {
-        vec4 p = vec4 (position, 1.0);
-        worldPosition = transformDirection(position, modelMatrix);
-        gl_Position = projectionMatrix * modelViewMatrix * p;
-      }
-		</script>
+    <title>Peer connection</title>
 
-		<script id="fragmentShader-baseball-equi" type="x-shader/x-fragment">
-			uniform sampler2D map;
-			varying vec3 worldPosition;
-      const float pi = 3.141592653589793238462643;
-			const float twoPi = 6.283185307179586476925286;
-							
-			mat3 rotationMatrix(vec3 euler) {
-				vec3 se = sin(euler);
-				vec3 ce = cos(euler);
-				return mat3(ce.y, 0, -se.y, 0, 1, 0, se.y, 0, ce.y) * mat3(1, 0, 0, 0, ce.x, se.x, 0, -se.x, ce.x) * mat3(ce.z,  se.z, 0,-se.z, ce.z, 0, 0, 0, 1);
-			}
-							
-			vec3 toCartesian(vec2 st){
-				vec3 ps = rotationMatrix(vec3(st.y, st.x, 0.0)) * vec3(0.0, 0.0, -1.0);
-				return rotationMatrix(radians(vec3(-0.0, -180.0, -90.0))) * ps;
-			}
-							
-			void main () {
-				vec3 direction = normalize(worldPosition);
-				vec2 st = vec2(atan(direction.z, direction.x), acos(-direction.y));
-				st /= vec2(twoPi, pi);
-        st.x += 0.5;
-				vec2 txtCoord;
-				
-				if(st.x >= 0.125 && st.x <= 0.875 && st.y >= 0.25 && st.y <= 0.75){
-					txtCoord.x = (st.x - 0.125) / 0.75;
-					txtCoord.y = st.y + 0.25;
-				} else {
-					txtCoord = vec2(st.x - 0.5, st.y + 0.5) * vec2(twoPi, pi);
-					vec3 uv = toCartesian(txtCoord);
-					txtCoord = vec2(atan(uv.x, uv.z), acos(-uv.y));
-					txtCoord /= vec2(twoPi, pi);
-					txtCoord.x = (0.375 - txtCoord.x) / 0.75;
-					txtCoord.y = txtCoord.y - 0.25;
-				}
-				
-				gl_FragColor = texture2D(map, txtCoord);
-      }
-		</script>
+    <link rel="icon" sizes="192x192" href="../../../images/webrtc-icon-192x192.png">
+    <link href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="../../../css/main.css"/>
+    <link rel="stylesheet" href="css/main.css"/>
 
-		<script id="fragmentShader-baseball-equi-v2" type="x-shader/x-fragment">
-			uniform sampler2D map;
-			varying vec3 worldPosition;
-      const float pi = 3.141592653589793238462643;
-			const float twoPi = 6.283185307179586476925286;
-							
-			mat3 rotationMatrix(vec3 euler) {
-				vec3 se = sin(euler);
-				vec3 ce = cos(euler);
-				return mat3(ce.y, 0, -se.y, 0, 1, 0, se.y, 0, ce.y) * mat3(1, 0, 0, 0, ce.x, se.x, 0, -se.x, ce.x) * mat3(ce.z,  se.z, 0,-se.z, ce.z, 0, 0, 0, 1);
-			}
-							
-			vec3 toCartesian(vec2 st){
-				vec3 ps = rotationMatrix(vec3(st.y, st.x, 0.0)) * vec3(0.0, 0.0, -1.0);
-				return rotationMatrix(radians(vec3(-0.0, -180.0, -90.0))) * ps;
-			}
-							
-			void main () {
-				vec3 direction = normalize(worldPosition);
-				vec2 st = vec2(atan(direction.z, direction.x), acos(-direction.y));
-				st /= vec2(twoPi, pi);
-        st.x += 0.5;
-				vec2 txtCoord;
-				
-				if(st.x >= 0.125 && st.x <= 0.875 && st.y >= 0.25 && st.y <= 0.75){
-					txtCoord.x = (st.x - 0.125) / 0.75;
-					txtCoord.y = st.y * (2.0 / 3.0) * 2.0;
-				} else {
-					txtCoord = vec2(st.x - 0.5, st.y + 0.5) * vec2(twoPi, pi);
-					vec3 uv = toCartesian(txtCoord);
-					txtCoord = vec2(atan(uv.x, uv.z), acos(-uv.y));
-					txtCoord /= vec2(twoPi, pi);
-					txtCoord.x = (0.375 - txtCoord.x) / 0.75;
-					txtCoord.y = (txtCoord.y - 0.25) * (2.0 / 3.0);
-				}
-				
-				gl_FragColor = texture2D(map, txtCoord);
-      }
-		</script>
+</head>
 
-		<script id="fragmentShader-equi" type="x-shader/x-fragment">
-			uniform sampler2D map;
-      varying vec3 worldPosition;
-      const float pi = 3.141592653589793238462643;
-      const float twoPi = 6.283185307179586476925286;
-      void main () {
-        vec3 direction = normalize(worldPosition);
-        vec2 st = vec2(atan(direction.z, direction.x), acos(-direction.y));
-        st /= vec2(twoPi, pi);
-        st.x += 0.5;
-        gl_FragColor = texture2D(map, st);
-      }
-		</script>
+<body>
 
-		<script>
-			var controls, camera, scene, renderer;
+<div id="container">
+    <h1><a href="//webrtc.github.io/samples/" title="WebRTC samples homepage">WebRTC samples</a>
+        <span>Peer connection</span></h1>
 
-			var isUserInteracting = false,
-				lon = 0, lat = 0,
-				phi = 0, theta = 0,
-				distance = 0.0000000001,
-				onPointerDownPointerX = 0,
-				onPointerDownPointerY = 0,
-				onPointerDownLon = 0,
-				onPointerDownLat = 0;
+    <p>This sample shows how to setup a connection between two peers using
+        <a href="https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection">RTCPeerConnection</a>.
+    </p>
 
-			init();
-			animate();
+    <video id="localVideo" playsinline autoplay muted></video>
+    <video id="remoteVideo" playsinline autoplay></video>
 
-			function init() {
-				// CAMERAS
-				camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight,1, 100000);
-				camera.target = new THREE.Vector3(0, 0, 0);
+    <div class="box">
+        <button id="startButton">Start</button>
+        <button id="callButton">Call</button>
+        <button id="hangupButton">Hang Up</button>
+    </div>
 
-				// SCENE
-				scene = new THREE.Scene();
-				
-				// Textures	
-				//var texture = new THREE.TextureLoader().load( 'https://raw.githubusercontent.com/FinweLtd/orion360-sdk-test-content/master/set1/equi/Orion360_test_image_1920x960.jpg' );
-				var texture = new THREE.TextureLoader().load('http://localhost:8000/baseball-v2.jpg');
-				texture.mapping = THREE.EquirectangularReflectionMapping;
-				texture.magFilter = THREE.NearestFilter;
-				texture.minFilter = THREE.NearestFilter;
-				texture.encoding = THREE.sRGBEncoding;
-				
-				var geometry = new THREE.SphereBufferGeometry( 100, 64, 64);
-				// var geometry = new THREE.BoxGeometry(200, 200, 200);
-				// geometry.scale(-1, 1, 1);
-				// var material = new THREE.MeshBasicMaterial( {map: texture} );
-				// material.side = THREE.BackSide;
-		
-				var uniforms = {map : {type: 't', value: texture}}
-				material = new THREE.ShaderMaterial({
-        	side: THREE.BackSide,
-        	uniforms: uniforms,
-					vertexShader: document.getElementById('vertexShader').textContent,
-					fragmentShader: document.getElementById('fragmentShader-baseball-equi-v2').textContent	
-				});
-				
-				var sphere = new THREE.Mesh( geometry, material );
-				scene.add( sphere );
-				
-				renderer = new THREE.WebGLRenderer();
-				renderer.autoClear = false;
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				document.body.appendChild( renderer.domElement );
-				renderer.gammaOutput = true;
+    <p>View the console to see logging. The <code>MediaStream</code> object <code>localStream</code>, and the <code>RTCPeerConnection</code>
+        objects <code>pc1</code> and <code>pc2</code> are in global scope, so you can inspect them in the console as
+        well.</p>
 
-				//mouse control 
-				document.addEventListener( 'mousedown', onDocumentMouseDown, false );
-				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-				document.addEventListener( 'mouseup', onDocumentMouseUp, false );
-			}
+    <p>For more information about RTCPeerConnection, see <a href="http://www.html5rocks.com/en/tutorials/webrtc/basics/"
+                                                            title="HTML5 Rocks article about WebRTC by Sam Dutton">Getting
+        Started With WebRTC</a>.</p>
 
-			function onDocumentMouseDown( event ) {
-				event.preventDefault();
 
-				isUserInteracting = true;
+    <a href="https://github.com/webrtc/samples/tree/gh-pages/src/content/peerconnection/pc1"
+       title="View source for this page on GitHub" id="viewSource">View source on GitHub</a>
 
-				onPointerDownPointerX = event.clientX;
-				onPointerDownPointerY = event.clientY;
+</div>
 
-				onPointerDownLon = lon;
-				onPointerDownLat = lat;
-			}
+<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+<script src="js/main.js" async></script>
 
-			function onDocumentMouseMove( event ) {
-				if ( isUserInteracting === true ) {
-					lon = ( onPointerDownPointerX - event.clientX ) * 0.1 + onPointerDownLon;
-					lat = ( event.clientY - onPointerDownPointerY ) * 0.1 + onPointerDownLat;
-
-				}
-			}
-
-			function onDocumentMouseUp() {
-				isUserInteracting = false;
-			}
-
-			// update scene
-			function animate() {
-				requestAnimationFrame( animate );
-				render();
-			}
-
-			function render() {
-				lat = Math.max(-85, Math.min(85, lat));
-      	phi = THREE.Math.degToRad(90 - lat);
-      	theta = THREE.Math.degToRad(lon);
-				camera.position.x = -distance * Math.sin( phi ) * Math.cos( theta );
-				camera.position.y = distance * Math.cos( phi );
-				camera.position.z = -distance * Math.sin( phi ) * Math.sin( theta );
-				camera.lookAt(camera.target);
-				camera.updateMatrixWorld();
-				renderer.render( scene, camera );
-			}
-		</script>
-
-	</body>
+<script src="../../../js/lib/ga.js"></script>
+</body>
 </html>
