@@ -56,12 +56,24 @@ function getOtherPc(pc) {
   return (pc === pc1) ? pc2 : pc1;
 }
 
+async function loadAndBlur() {
+  const net = await bodyPix.load();
+  // const segmentation = await net.segmentPerson(img);
+
+  const backgroundBlurAmount = 9;
+  const edgeBlurAmount = 3;
+  const flipHorizontal = false;
+
+  // bodyPix.drawBokehEffect(canvas, img, segmentation, backgroundBlurAmount, edgeBlurAmount, flipHorizontal);
+}
+
 async function start() {
   console.log('Requesting local stream');
   startButton.disabled = true;
   try {
     const stream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
     console.log('Received local stream');
+    loadAndBlur();
     localVideo.srcObject = stream;
     localStream = stream;
     callButton.disabled = false;
